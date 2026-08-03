@@ -73,6 +73,14 @@ public sealed class WorkflowDbContext : DbContext
             e.HasIndex(x => x.DefinitionId);
             e.Property(x => x.CurrentState).HasMaxLength(128);
             e.Property(x => x.DefinitionId).HasMaxLength(128);
+            // The SQLite provider cannot translate ORDER BY on DateTimeOffset columns.
+            // Store timestamps as Unix milliseconds so sorting is plain numeric SQL.
+            e.Property(x => x.CreatedAt).HasConversion(
+                v => v.ToUnixTimeMilliseconds(),
+                v => DateTimeOffset.FromUnixTimeMilliseconds(v));
+            e.Property(x => x.UpdatedAt).HasConversion(
+                v => v.ToUnixTimeMilliseconds(),
+                v => DateTimeOffset.FromUnixTimeMilliseconds(v));
         });
 
         modelBuilder.Entity<WorkflowTemplateEntity>(e =>
