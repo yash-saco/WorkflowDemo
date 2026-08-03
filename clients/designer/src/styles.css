@@ -73,3 +73,43 @@ td { padding: 8px; border-top: 1px solid var(--border); vertical-align: top; }
 .hist { font-size: 12px; color: var(--muted); margin: 4px 0 0; padding-left: 16px; }
 .muted { color: var(--muted); font-size: 12px; }
 h2 { font-size: 15px; margin: 0 0 10px; }
+
+/* Interactive flow editor */
+.flow-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.fnode {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 8px 14px; border-radius: 10px; font-size: 13px; border: 1px solid var(--border);
+  background: #fff; font-family: inherit;
+}
+.fnode.start { background: var(--accent-soft); border-color: #c8d8fb; color: var(--accent); }
+.fnode.decision { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
+.fnode.end { background: #f0fdf4; border-color: #bbe7c8; color: var(--ok); font-weight: 600; }
+.fnode.cond {
+  background: #fff7ed; border-color: #fed7aa; color: #c2410c; cursor: pointer; max-width: 180px;
+}
+.fnode.cond.open, .fnode.step.open { outline: 2px solid var(--accent); }
+.fnode.step { cursor: pointer; position: relative; min-width: 120px; padding-right: 24px; }
+.fnode.step.approval { border-color: #c8d8fb; }
+.fnode.step.auto { background: #f8fafc; border-style: dashed; }
+.step-name { font-weight: 600; }
+.step-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.step-x {
+  position: absolute; top: 4px; right: 6px; font-size: 11px; color: var(--muted); cursor: pointer;
+}
+.step-x:hover { color: var(--danger); }
+.farrow { color: var(--muted); font-size: 15px; }
+.cardwrap { display: inline-flex; align-items: center; gap: 8px; }
+.insert {
+  width: 20px; height: 20px; border-radius: 50%; border: 1px dashed var(--border);
+  background: none; color: var(--muted); cursor: pointer; font-size: 12px; line-height: 1;
+}
+.insert:hover { border-color: var(--accent); color: var(--accent); }
+.lane { border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-top: 12px; background: #fbfcfe; }
+.lane-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.lane-name { font-weight: 600; border: 1px solid transparent; background: none; min-width: 220px; }
+.lane-name:hover, .lane-name:focus { border-color: var(--border); background: #fff; }
+.lane-cards { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.editor-panel {
+  margin-top: 10px; padding: 10px; border: 1px solid var(--border); border-radius: 8px;
+  background: #fff; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}

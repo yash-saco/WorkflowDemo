@@ -1,16 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from './api';
-import Diagram from './Diagram';
-import RuleCard from './RuleCard';
-import { diagramText } from './diagramText';
-
-const newRule = (priority) => ({
-  id: `rule-${Math.random().toString(36).slice(2, 8)}`,
-  name: 'New rule',
-  priority,
-  condition: { field: 'role', operator: 'in', values: [] },
-  steps: [{ type: 'approval', name: 'Manager approval', approver: { mode: 'hierarchy', level: 1 } }],
-});
+import FlowEditor from './FlowEditor';
 
 export default function DesignerTab({ employees, templates, refreshTemplates, flash }) {
   const [tpl, setTpl] = useState(null);
@@ -36,11 +26,6 @@ export default function DesignerTab({ employees, templates, refreshTemplates, fl
     return [...set];
   }, [employees, tpl]);
 
-  const setRule = (i, rule) =>
-    setTpl((t) => ({ ...t, rules: t.rules.map((r, j) => (j === i ? rule : r)) }));
-  const removeRule = (i) => setTpl((t) => ({ ...t, rules: t.rules.filter((_, j) => j !== i) }));
-  const addRule = () => setTpl((t) => ({ ...t, rules: [...t.rules, newRule(t.rules.length + 1)] }));
-
   const create = () => {
     const name = prompt('Name of the new workflow (e.g. "Access Request"):');
     if (!name) return;
@@ -48,8 +33,22 @@ export default function DesignerTab({ employees, templates, refreshTemplates, fl
     if (!id) return flash('error', 'The name must contain at least one letter or number.');
     if (templates.some((t) => t.id === id))
       return flash('error', `A workflow with id "${id}" already exists — pick a different name.`);
-    setTpl({ id, name, rules: [newRule(1)] });
-    flash('ok', 'New workflow started — add rules, then press "Save workflow".');
+    setTpl({
+      id,
+      name,
+      rules: [
+        {
+          id: `rule-${Math.random().toString(36).slice(2, 8)}`,
+          name: 'New rule',
+          priority: 1,
+          condition: { field: 'role', operator: 'in', values: [] },
+          steps: [
+            { type: 'approval', name: 'Manager approval', approver: { mode: 'hierarchy', level: 1 } },
+          ],
+        },
+      ],
+    });
+    flash('ok', 'New workflow started — edit the flow, then press "Save workflow".');
   };
 
   const save = async () => {
@@ -60,11 +59,11 @@ export default function DesignerTab({ employees, templates, refreshTemplates, fl
     if (empty)
       return flash(
         'error',
-        `Rule "${empty.name}" says "one of:" but no roles are ticked — it would never match anyone.`,
+        `Rule "${empty.name}" has no roles ticked — it would never match anyone.`,
       );
     try {
       await api(`/api/templates/${encodeURIComponent(tpl.id)}`, { method: 'PUT', body: tpl });
-      flash('ok', 'Saved. The flow below is what will run.');
+      flash('ok', 'Saved. This flow is now live.');
       await refreshTemplates();
     } catch (e) {
       flash('error', e.message);
@@ -118,32 +117,11 @@ export default function DesignerTab({ employees, templates, refreshTemplates, fl
       </div>
 
       <div className="card">
-        <h2>Routing rules</h2>
-        <p className="muted" style={{ margin: 0 }}>
-          Rules are checked top to bottom; the first one matching the requester decides the
-          approval chain.
+        <h2>Flow (click any box to edit)</h2>
+        <p className="muted" style={{ margin: '0 0 10px' }}>
+          Rules are checked top to bottom; the first branch matching the requester runs.
         </p>
-        {!tpl && <p className="muted">No workflow selected.</p>}
-        {tpl?.rules.map((rule, i) => (
-          <RuleCard
-            key={rule.id}
-            rule={rule}
-            roles={roles}
-            employees={employees}
-            onChange={(r) => setRule(i, r)}
-            onRemove={() => removeRule(i)}
-          />
-        ))}
-        {tpl && (
-          <button className="ghost" style={{ marginTop: 12 }} onClick={addRule}>
-            + Add rule
-          </button>
-        )}
-      </div>
-
-      <div className="card">
-        <h2>Flow preview (auto-generated)</h2>
-        <Diagram text={diagramText(tpl, employees)} />
+        <FlowEditor tpl={tpl} onChange={setTpl} roles={roles} employees={employees} />
       </div>
     </section>
   );
