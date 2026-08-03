@@ -1,0 +1,6 @@
+bin/
+obj/
+*.user
+workflow.db
+.vs/
+node_modules/
